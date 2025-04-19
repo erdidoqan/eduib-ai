@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "app/question-create/actions.ts": {
+      "maxDuration": 300
+    }
+  }
+}
