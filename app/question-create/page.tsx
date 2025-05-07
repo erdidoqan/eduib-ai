@@ -137,7 +137,7 @@ Difficulty: ${selectedParams.difficulty}`
   }
 
   const handlePaymentRedirect = () => {
-    window.location.href = 'https://eduib.com/membership'
+    window.open('https://eduib.com/membership', '_blank')
   }
 
   return (
