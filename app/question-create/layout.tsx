@@ -9,9 +9,7 @@ export default function QuestionCreateLayout({
 }) {
   return (
     <>
-      <Header />
       {children}
-      <Footer />
       {/* Remove MathJax script since we're using react-latex with KaTeX */}
     </>
   )

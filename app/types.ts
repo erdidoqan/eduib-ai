@@ -1,5 +1,5 @@
 export interface Parameter {
-  id?: string
+  id: string
   name: string
   value: string
   course?: string
@@ -19,9 +19,9 @@ export interface ApiResponse {
 }
 
 export interface QuestionParameters {
-  courseId: string
-  topicId: string
-  subtopicId: string
-  specificTopicId: string
-  difficulty: string
+  courseId?: string
+  topicId?: string
+  subtopicId?: string
+  specificTopicId?: string
+  difficulty?: string
 } 

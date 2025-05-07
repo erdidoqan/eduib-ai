@@ -10,12 +10,15 @@ import { Loader2, AlertCircle } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { QuestionDisplay } from "../components/QuestionDisplay"
 import { Parameter, ApiResponse, QuestionParameters } from "../types"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 
 export default function QuestionCreatePage() {
   const [loading, setLoading] = useState(false)
   const [questionData, setQuestionData] = useState<{ question: string; solution: string } | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [parameters, setParameters] = useState<Parameter[]>([])
+  const [questionCount, setQuestionCount] = useState(0)
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false)
   
   const [selectedParams, setSelectedParams] = useState<QuestionParameters>({
     courseId: "",
@@ -43,6 +46,14 @@ export default function QuestionCreatePage() {
     }
 
     loadParameters()
+  }, [])
+
+  // Load question count from localStorage on mount
+  useEffect(() => {
+    const savedCount = localStorage.getItem('questionCount')
+    if (savedCount) {
+      setQuestionCount(parseInt(savedCount))
+    }
   }, [])
 
   const getCurrentCourse = () => parameters.find(p => p.id === selectedParams.courseId)
@@ -75,6 +86,13 @@ export default function QuestionCreatePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Check if user has reached the limit
+    if (questionCount >= 3) {
+      setShowPaymentDialog(true)
+      return
+    }
+
     setLoading(true)
     setError(null)
     setQuestionData(null)
@@ -84,9 +102,15 @@ export default function QuestionCreatePage() {
       const topic = getCurrentTopic()
       const subtopic = getCurrentSubTopic()
       
-      const prompt = `${course?.name}
-Topic: ${topic?.name}
-Subtopic: ${subtopic?.name}
+      if (!course || !topic || !subtopic || 
+          !selectedParams.specificTopicId || 
+          !selectedParams.difficulty) {
+        throw new Error("Please fill in all fields")
+      }
+      
+      const prompt = `${course.name}
+Topic: ${topic.name}
+Subtopic: ${subtopic.name}
 Specific Topic: ${selectedParams.specificTopicId}
 Difficulty: ${selectedParams.difficulty}`
 
@@ -99,6 +123,10 @@ Difficulty: ${selectedParams.difficulty}`
           question: result.question,
           solution: result.solution
         })
+        // Increment question count and save to localStorage
+        const newCount = questionCount + 1
+        setQuestionCount(newCount)
+        localStorage.setItem('questionCount', newCount.toString())
       }
     } catch (error) {
       setError(`An unexpected error occurred: ${error instanceof Error ? error.message : "Unknown error"}`)
@@ -108,10 +136,18 @@ Difficulty: ${selectedParams.difficulty}`
     }
   }
 
+  const handlePaymentRedirect = () => {
+    window.location.href = 'https://eduib.com/membership'
+  }
+
   return (
     <main className="container mx-auto py-10">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">IB Math Question Generator</h1>
+        <h1 className="text-3xl font-bold mb-8 text-[#16AB8E]">IB Math Question Generator</h1>
+        <div className="mb-4 p-3 bg-[#16AB8E]/10 rounded-lg">
+          <span className="font-medium text-[#16AB8E]">Free trial:</span>{" "}
+          <span className="font-semibold text-[#1a2b4c]">{3 - questionCount} questions remaining</span>
+        </div>
 
         {error && (
           <Alert variant="destructive" className="mb-6">
@@ -277,6 +313,22 @@ Difficulty: ${selectedParams.difficulty}`
             </CardContent>
           </Card>
         </div>
+
+        <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold text-[#1a2b4c]">Free Trial Ended</DialogTitle>
+              <DialogDescription className="text-[#4a5567] mt-2">
+                You have used up your <b>3</b> question creation limit in your free trial. Please upgrade your membership to create more questions.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button onClick={handlePaymentRedirect} className="bg-[#16AB8E] hover:bg-[#138F78] text-white">
+                Upgrade Membership
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </main>
   )
