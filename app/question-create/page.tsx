@@ -143,7 +143,6 @@ Difficulty: ${selectedParams.difficulty}`
   return (
     <main className="container mx-auto py-10">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 text-[#16AB8E]">IB Math Question Generator</h1>
         <div className="mb-4 p-3 bg-[#16AB8E]/10 rounded-lg">
           <span className="font-medium text-[#16AB8E]">Free trial:</span>{" "}
           <span className="font-semibold text-[#1a2b4c]">{3 - questionCount} questions remaining</span>
